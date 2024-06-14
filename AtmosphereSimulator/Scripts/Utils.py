@@ -49,16 +49,18 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
         
         k = 2 * np.pi / lamda
 
-
+    
         # !!!! Ask Michael
-        #Calculating satellite slew rate
-        ws = circ_orbit_geo(stellite_orbit_height)[2]
+        #Calculating satellite slew rate, v_tang / range = slew rate -> rad/s
+        ws = circ_orbit_geo(stellite_orbit_height)[1] / circ_orbit_geo(stellite_orbit_height)[0]
 
-        #Creating Bufton wind model function
+        #Creating Bufton wind model function - for wind speed only
         bufton_function = lambda h: ws * h + ground_wind_speed + 30 * np.exp(-((h - 9400) / 4800) ** 2)
+        # bufton_function for Cn2 use , without the term Ws*h, why? cause satellite speed is not relevant to Cn2 :)
+        bufton_function_Cn2 = lambda h: ground_wind_speed + 30 * np.exp(-((h - 9400) / 4800) ** 2)
 
         #calculing rms wind
-        rms_wind = np.sqrt(1 / (15 * 1e3) * integrate.quad(bufton_function, 5e3, 20e3)[0])
+        rms_wind = np.sqrt(1 / (15 * 1e3) * integrate.quad(bufton_function_Cn2, 5e3, 20e3)[0])
 
         # cn2 calculation
         cn2 = lambda h : (.00594 * (rms_wind / 27) ** 2 * (1e-5*h) ** 10 * np.exp(-h/1000) + 2.7e-16 * np.exp(-h/1500) + A * np.exp(-h/100))
@@ -116,9 +118,9 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
 
         r0_array = []
         # Is this correct?
-        for i in range(len(h_arr)-2):
+        for i in range(len(h_arr)-1):
             r0_array.append(r0_calc(h_arr[i], h_arr[i+1]))
-
+        h_arr = h_arr[1:]
         if print_results:
             print(f"r0_array: {r0_array}")
 
@@ -126,20 +128,22 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
         if print_results:
             print(f"Wind profile: {wind_profile}")
 
-        h_arr = h_arr[1:]
+        
 
         if print_results:
             print(f"Number of layers : {len(h_arr)}")
             print(h_arr)
         # doing the next two lines so every element in the array is the same
-        h_arr = [item[0] for item in h_arr]
-        wind_profile = [item[0] for item in wind_profile]
+        
+        h_arr  = [item.item() if isinstance(item, np.ndarray) else item for item in h_arr]
+        wind_profile = [item.item() if isinstance(item, np.ndarray) else item for item in wind_profile]
+        # wind_profile = [item[0] for item in wind_profile]
         return r0_array, h_arr, wind_profile
         
-def calculate_number_of_extrusions(layer: Layer, wind_speed_rms, layer_rms_speed, simulation_tick_time_sec):
-    v_total = layer_rms_speed + wind_speed_rms
+def calculate_number_of_extrusions(layer: Layer, v_total, simulation_tick_time_sec):
+    """Bufton model V(h) gives out the evolution speed of a phase screen at height h = v_total"""
+    
     delta_x = v_total * simulation_tick_time_sec
-    delta_x_each_screen = layer.pixel_scale * layer.screen_size
-    columns_per_tick = delta_x / delta_x_each_screen
+    columns_per_tick = delta_x / layer.pixel_scale
 
     return columns_per_tick

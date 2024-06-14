@@ -16,7 +16,7 @@ class Geometry:
     per_tick_simulation: float = 1e-3
     number_of_layers: int = 10
     satellite_orbit: float = 6e5
-    ground_wind_speed: float = 0
+    ground_wind_speed: float = 5
     r0_array: list = field(default_factory=list, init=False)
     layer_height_array: list = field(default_factory=list, init=False)
     wind_proofile_array: list = field(default_factory=list, init=False)
@@ -37,10 +37,12 @@ class Geometry:
         # Creating number of extrusions array
         for i in range(self.number_of_layers):
             self.layer_object_array.append(Layer(self.nx_size, self.pixel_scale, self.r0_array[i]))
-            print(self.layer_height_array[i])
+            print(f"Currently Creating a Lyaer at height: {self.layer_height_array[i]} ...")
+            # calculating phase screen evolution speed at each layer (m/s)
+            # Double check this!!! V(h) is passeed as the layer's speed -> contains wind speed and satellite speed combined
             self.number_of_calculated_extrusions_array.append(calculate_number_of_extrusions(self.layer_object_array[i], self.wind_proofile_array[i],
-                                                                                             circ_orbit_geo(self.layer_height_array[i])[2], self.per_tick_simulation))
+                                                                                             self.per_tick_simulation))
 
-    
+        print(f"Number of extrusions: {self.number_of_calculated_extrusions_array}")
 if __name__ == "__main__":
     geometry = Geometry(128, 2e-2)

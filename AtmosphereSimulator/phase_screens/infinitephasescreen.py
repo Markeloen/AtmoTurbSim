@@ -5,11 +5,9 @@ import numpy    # type: ignore
 import numba   # type: ignore
 import sys
 
-sys.path.append(r"C:\Users\akhlaghh\OneDrive - McMaster University\1. Research\2. Code\9. final_revisions\src\phase_screens") # Fix this later
 
-
-from phasescreen_github import *
-from turb import *
+from phase_screens.phasescreen_github import *
+from phase_screens.turb import *
 
 __all__ = ["PhaseScreenVonKarman", "PhaseScreenKolmogorov"]
 

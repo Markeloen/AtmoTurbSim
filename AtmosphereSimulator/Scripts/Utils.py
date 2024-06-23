@@ -3,8 +3,10 @@ import scipy.integrate as integrate # type: ignore
 from scipy import optimize # type: ignore
 from math import cos
 from dataclasses import dataclass, field
+import matplotlib.pyplot as plt
 
 from Scripts.Layer import Layer
+# from Scripts.Geometry import Geometry
 
 
 def circ_orbit_geo(h_orbit, elev_angle_deg = 90):
@@ -147,3 +149,85 @@ def calculate_number_of_extrusions(layer: Layer, v_total, simulation_tick_time_s
     columns_per_tick = delta_x / layer.pixel_scale
 
     return columns_per_tick
+
+
+# Incomplete!!
+def show_geomerty_layers(gerometry, shown_layer_array = [0, 4, 9]):
+    """ This function will create a grid view plot to show phase screen 
+    evolution of the layers in the geometry object"""
+    
+    n = len(shown_layer_array)
+    fig, axes = plt.subplots(n, 2, figsize=(10, 6))
+    
+    gerometry.show_object_info()
+    
+    # Configure font size for ticks
+    plt.rcParams['xtick.labelsize'] = 8
+    plt.rcParams['ytick.labelsize'] = 8
+    
+    r0 = 20e-2
+    layer = Layer(128, 2e-2, r0)
+    # Extract data
+    layer.extude_return_column()
+    data_xaxis = layer.retrun_modulus_function_xaxis()
+        
+    for i in range(n):
+    # Display the phase screen with a more colorful and clear colormap
+        im = axes[i, 0].imshow(layer.scrn, cmap='viridis')
+        fig.colorbar(im, ax=axes[i, 0], orientation='vertical', shrink=0.6)
+        axes[i, 0].set_title('Phase Screen')
+        
+        # Optionally, remove tick labels for a cleaner look
+        axes[i, 0].set_xticklabels([])
+        axes[i, 0].set_yticklabels([])
+
+        # Plot modulus function with clearly distinguished line styles and markers
+        
+        axes[i, 1].plot(data_xaxis[2], data_xaxis[0], 'r-', label='Modulus 1')
+        
+        axes[i, 1].autoscale(tight=False)
+        axes[i, 1].plot(data_xaxis[2], data_xaxis[1], 'b--', label='Modulus 2')
+        axes[i, 1].legend(loc='upper right')
+        axes[i, 1].set_xlabel('X-axis')
+        axes[i, 1].set_ylabel('Modulus Value')
+        
+        
+    # Improve overall aesthetics
+    plt.tight_layout()
+    plt.show(block=False)
+
+        
+    for idx, layer_ith in enumerate(shown_layer_array):
+        for ext_level in range(int(gerometry.number_extrusion_array_whole[layer_ith])):
+            gerometry.layer_object_array[layer_ith].extude_return_scrn()
+            
+                # Update data
+            data_xaxis = gerometry.layer_object_array[layer_ith].retrun_modulus_function_xaxis()
+            
+            # Update phase screen
+            axes[idx, 0].images[0].set_data(gerometry.layer_object_array[layer_ith].scrn)
+            axes[idx, 0]
+            # Optionally, remove tick labels to keep the updated phase screen clean
+            axes[idx, 0].set_xticklabels([])
+            axes[idx, 0].set_yticklabels([])
+            axes[idx, 1].set_title(f'Modulus Function for Layer {layer_ith} iteration {ext_level}/{gerometry.number_extrusion_array_whole[layer_ith]}')
+            # Update modulus function plots
+            axes[idx, 1].lines[0].set_ydata(data_xaxis[0])
+            axes[idx, 1].lines[0].set_xdata(data_xaxis[2])
+            axes[idx, 1].lines[1].set_ydata(np.abs(data_xaxis[1]))
+            axes[idx, 1].lines[1].set_xdata(data_xaxis[2])
+        
+            if gerometry.number_extrusion_array_whole[layer_ith] < 1000:
+                plt.pause(0.01)
+            plt.pause(0.001)
+            
+    
+    
+    
+    # Improve overall aesthetics
+    plt.tight_layout()
+    plt.show(block=False)
+    
+    return fig, axes
+    
+    

@@ -79,7 +79,7 @@ def fresnel_prop_square_ap(x2, y2, D1, wvl, Dz):
 
 def corr2_ft(u1, u2, mask, delta):
     N = (u1.shape)[0]
-    c = np.zeros( (N,N) )
+    c = np.zeros( (N,N) , dtype=np.complex64)
     delta_f = 1/(N*delta)
 
     U1 = ft2(u1 * mask, delta)
@@ -88,5 +88,6 @@ def corr2_ft(u1, u2, mask, delta):
 
     maskcorr = ift2(abs(ft2(mask, delta))**2, delta_f) * delta**2
     idx = maskcorr != 0
+    # How to fix this?
     c[idx] = U12corr[idx] / maskcorr[idx] * mask[idx]
     return c

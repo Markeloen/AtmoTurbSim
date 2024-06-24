@@ -4,6 +4,8 @@ from scipy import optimize # type: ignore
 from math import cos
 from dataclasses import dataclass, field
 import matplotlib.pyplot as plt
+from PIL import Image
+import io
 
 from Scripts.Layer import Layer
 # from Scripts.Geometry import Geometry
@@ -170,6 +172,8 @@ def show_geomerty_layers(gerometry, shown_layer_array = [0, 4, 9]):
     # Extract data
     layer.extude_return_column()
     data_xaxis = layer.retrun_modulus_function_xaxis()
+    
+    images = []  # List to hold images
         
     for i in range(n):
     # Display the phase screen with a more colorful and clear colormap
@@ -196,7 +200,7 @@ def show_geomerty_layers(gerometry, shown_layer_array = [0, 4, 9]):
     plt.tight_layout()
     plt.show(block=False)
 
-        
+    counter = 0
     for idx, layer_ith in enumerate(shown_layer_array):
         for ext_level in range(int(gerometry.number_extrusion_array_whole[layer_ith])):
             gerometry.layer_object_array[layer_ith].extude_return_scrn()
@@ -221,13 +225,33 @@ def show_geomerty_layers(gerometry, shown_layer_array = [0, 4, 9]):
                 plt.pause(0.01)
             plt.pause(0.001)
             
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=80)
+            buf.seek(0)
+            img = Image.open(buf)
+            img.load()
+            images.append(img.copy())
+            buf.close()
+            counter += 1
+            if counter > 3000:
+                break
     
-    
+    # Save images as a GIF
+    images[0].save('phase_screens.gif', save_all=True, append_images=images[1:], optimize=False, duration=40, loop=0)
+
+
     
     # Improve overall aesthetics
     plt.tight_layout()
     plt.show(block=False)
     
     return fig, axes
+
+
+
+
+
     
     
+if __name__ == "__main__":
+    pass

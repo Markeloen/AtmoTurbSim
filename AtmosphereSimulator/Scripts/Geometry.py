@@ -44,7 +44,32 @@ class Geometry:
 
         self.number_extrusion_array_whole = np.array(self.number_extrusions_array_per_tick) * self.whole_simulation_time / self.per_tick_simulation
         self.number_extrusion_array_whole = np.ceil(self.number_extrusion_array_whole)
+    
+    
+    
+    
+    def move_one_tick_all_layers(self):
+        """ Moving all layers for tick columns and 
+            returning phase screens as an array
+        """
+        ps_arr = []
+        #temporary sol
+        extr_per_tick = np.ceil([3 * item for item in self.number_extrusions_array_per_tick])
         
+        for indx, ext_lvl in enumerate(extr_per_tick):
+            for _ in range(int(ext_lvl)):
+                self.layer_object_array[indx].extude_return_scrn()
+            ps_arr.append(self.layer_object_array[indx].scrn)
+        
+        return ps_arr
+            
+        
+    
+    
+    
+    
+    
+    
     def show_object_info(self):
         print(f"nx_size: {self.nx_size}")
         print(f"pixel_scale: {self.pixel_scale}")

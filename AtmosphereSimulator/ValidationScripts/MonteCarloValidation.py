@@ -22,6 +22,8 @@ def str_fnc2_ft(ph, mask, delta):
     # np.real and np.conj are used for real part and complex conjugate respectively
     D = 2 * ift2(np.real(S * np.conj(W)) - np.abs(P)**2, delta_f) / w2 * mask
     
+    
+    
     return np.abs(D)
 
 def str_fnc2_ft2(ph, mask, delta):
@@ -74,37 +76,46 @@ def coh_val_monte_carlo(r0, N, delta, nreal, l0 = .01, L0 = 100, number_of_extru
 if __name__ == "__main__":
     # # !!! Debug this section !!!
     
-    # N = 256
-    # delta = 0.001
-    # L0 = 100
-    # l0 = 0.01
-    # r0 = 0.01
+    N = 256
+    delta = 0.01
+    L0 = 100
+    l0 = 0.001
+    r0 = 1
+    # L = 16
+    # delta = L / N
+    # w = 2
     
-    # x = np.arange(-N/2., N/2.)
-    # [nx, ny] = np.meshgrid(x, x)
-
-    # xn = nx * delta
-    # yn = ny * delta
+    x = np.arange(-N/2., N/2.)
+    # print(len(x))
+    [nx, ny] = np.meshgrid(x, x)
+    
+    
+    xn = nx * delta
+    yn = ny * delta
+    
+    # A = rect(xn, 2) * rect(yn, 2)
     
     # mask = circ(xn, yn , N * delta)
+    mask = np.ones((N, N))
+    avg_str_fnc = 0
+    N_realization = 10
     
-    # avg_str_fnc = 0
-    # N_realization = 100
+    for i in range(N_realization):
+        ph = ft_sh_phase_screen(r0, N, L0, l0, delta, seed=i)
+        avg_str_fnc += str_fnc2_ft(ph, mask, delta) / N_realization
+        # avg_str_fnc += str_fnc2_ft(A, mask, 1) / N_realization
     
-    # for i in range(N_realization):
-    #     ph = ft_sh_phase_screen(r0, N, L0, l0, delta, seed=i)
-    #     avg_str_fnc += str_fnc2_ft(ph, mask, delta) / N_realization
-        
-        
-    # x = np.linspace(0, 12 * r0, N//2)
-    # theo_struc = 6.88 * (np.abs(x)/r0) ** (5/3)
-    # plt.plot(x,  avg_str_fnc[N//2, N//2:], label='Simulation')
-    # plt.show()
+    # plt.plot( np.linspace(0, 128, 128)*delta,np.abs(avg_str_fnc[N//2, N//2:]))    
+    
+    x = np.linspace(0, 12 * r0, N//2)
+    theo_struc = 6.88 * (np.abs(x)/r0) ** (5/3)
+    plt.plot(x,  avg_str_fnc[N//2, N//2:], label='Simulation')
+    plt.show()
     # comment args guide here here:
-    plot_list = [[128, 0.2, 0.02], [128, 0.5, 0.05], [256, 1, 0.2]]
+    # plot_list = [[128, 0.2, 0.02], [128, 0.5, 0.05], [256, 1, 0.2]]
 
-    for params in plot_list:
-        N, r0, delta = params
-        coh_val_monte_carlo(r0, N, delta, 100, 0.01, 25, 5 * N)
-        plt.savefig(f'plot_{N}_{r0}_{delta}.png')
-        plt.close()
+    # for params in plot_list:
+    #     N, r0, delta = params
+    #     coh_val_monte_carlo(r0, N, delta, 100, 0.01, 25, 5 * N)
+    #     plt.savefig(f'plot_{N}_{r0}_{delta}.png')
+    #     plt.close()

@@ -5,7 +5,7 @@ import scipy
 import time
 import timeit
 from datetime import datetime
-from hcipy import *
+
 import os
 import sys
 
@@ -19,10 +19,10 @@ parent_directory = os.path.dirname(script_directory)
 sys.path.append(parent_directory)
 
 from phase_screens.PhaseScreenGen import *
-from basic_funcs import *
+from propagation.basic_funcs import *
 
 
-class propagator:
+class Propagator:
     def __init__(self, N , wvl, delta1, deltan, z):
         self.N = N
         x = np.arange(-N/2., N/2.)

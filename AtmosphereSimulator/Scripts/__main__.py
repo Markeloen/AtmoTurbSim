@@ -68,5 +68,7 @@ from Scripts.Utils import *
 
 
 geometry = Geometry(128, 2e-2)
-show_geomerty_layers(geometry)
+geometry.show_object_info()
+geometry.move_one_tick_all_layers()
+# show_geomerty_layers(geometry)
 

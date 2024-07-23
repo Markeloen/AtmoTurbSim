@@ -13,9 +13,10 @@ class Geometry:
     """
     nx_size: int
     pixel_scale: float
+    r0: float = None
+    number_of_layers: int = 10
     whole_simulation_time: float = 1  # seconds
     per_tick_simulation: float = 1e-3  # seconds
-    number_of_layers: int = 10
     satellite_orbit: float = 6e5
     ground_wind_speed: float = 5
     r0_array: list = field(default_factory=list, init=False)
@@ -30,7 +31,7 @@ class Geometry:
         Initializes the Geometry object, calculating necessary profiles and creating Layer objects.
         """
         # Calculate r0, layer height, and wind profile
-        results = calc_r0_profile(self.ground_wind_speed, self.satellite_orbit, True)
+        results = calc_r0_profile(self.ground_wind_speed, self.satellite_orbit, True, self.r0, self.number_of_layers)
         self.r0_array, self.layer_height_array, self.wind_profile_array = results
 
         # Create Layer objects and number of extrusions array

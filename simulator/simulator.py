@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
 from tqdm import tqdm
 import os
+import shutil
 
 from core.propagation import Propagator
 from core.geometry import Geometry
@@ -12,18 +13,42 @@ from core.utils import *
 
 
 class Simulator:
-    def __init__(self, nx_size, delta):
-        self.nx_size = nx_size
-        self.delta = delta
-        self.geometry = Geometry(nx_size, delta)
+    def __init__(self, config):
+        atmosphere_params = config["atmosphere_params"]
+        simulation_params = config["simulation_params"]
+        
+        self.nx_size = atmosphere_params["phase_screen_size"]
+        self.delta = atmosphere_params["delta"]
+        self.total_r0 = atmosphere_params["total_r0"]
+        self.num_layers = atmosphere_params["num_layers"]
+        self.whole_simulation_time = simulation_params["whole_simulation_time"]
+        self.per_tick_simulation = simulation_params["per_tick_simulation"]
+        
+        
+        self.geometry = Geometry(
+            nx_size=self.nx_size,
+            pixel_scale=self.delta,
+            r0=self.total_r0,
+            number_of_layers=self.num_layers,
+            whole_simulation_time=simulation_params["whole_simulation_time"],
+            per_tick_simulation=simulation_params["per_tick_simulation"],
+            satellite_orbit=simulation_params["satellite_orbit"],
+            ground_wind_speed=atmosphere_params["ground_wind_speed"]
+        )
         # Create a timestamped output directory
         self.output_dir = create_output_directory()
+        # The config file path is always at the root
+        self.config_file_path = 'config.json'
         # Creating a propagator class for 20km and 1550nm wvl
-        self.propagator = Propagator(nx_size, 1550e-9, delta, delta, self.geometry.layer_height_array)
+        self.propagator = Propagator(self.nx_size, 1550e-9, self.delta, self.delta, self.geometry.layer_height_array)
+        
+    def save_config(self):
+        shutil.copy(self.config_file_path, os.path.join(self.output_dir, 'config.json'))
+        
         
         
     def simulate_turb(self):
-        steps = 1000
+        steps = self.whole_simulation_time / self.per_tick_simulation
         
         x = np.arange(-self.nx_size/2., self.nx_size/2.) * self.delta
         [x1, y1] = np.meshgrid(x, x) 
@@ -56,6 +81,9 @@ class Simulator:
         plt.close()
         
     def animate_turb(self, steps=10):
+        
+        steps = int(self.whole_simulation_time / self.per_tick_simulation)
+        
         x = np.arange(-self.nx_size/2., self.nx_size/2.) * self.delta
         [x1, y1] = np.meshgrid(x, x) 
         Uin = rect(x1, self.nx_size * self.delta) * rect(y1, self.nx_size * self.delta)
@@ -107,3 +135,6 @@ class Simulator:
         plt.close(fig)
 
         print("Animation saved as 'turbulence_animation.gif'")
+        print("Saving config file...")
+        self.save_config()
+        print("Config file saved as 'config.json'")

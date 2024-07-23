@@ -91,3 +91,4 @@ def corr2_ft(u1, u2, mask, delta):
     # How to fix this?
     c[idx] = U12corr[idx] / maskcorr[idx] * mask[idx]
     return c
+

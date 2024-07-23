@@ -1,0 +1,16 @@
+
+{
+    "atmosphere_params": {
+      "num_layers": 5,
+      "total_r0": 20e-2,
+      "phase_screen_size": 128,
+      "delta": 2e-2,
+      "ground_wind_speed": 5
+    },
+    
+    "simulation_params": {
+      "whole_simulation_time": 1,
+      "per_tick_simulation": 1e-3,
+      "satellite_orbit": 6e5
+    }
+  }

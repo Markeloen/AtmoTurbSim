@@ -11,7 +11,7 @@ import numpy as np
 import sys
 
 
-from util_funcs import *
+from legacy_scripts.util_funcs import *
 
 
 

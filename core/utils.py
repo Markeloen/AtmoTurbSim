@@ -9,6 +9,8 @@ import io
 import tensorflow as tf
 import numpy as np
 import scipy
+from scipy.integrate import quad
+from scipy.optimize import fsolve
 from datetime import datetime
 import os
 
@@ -16,6 +18,55 @@ import os
 
 from core.layer import Layer
 # from Scripts.Geometry import Geometry
+
+import numpy as np
+from scipy.integrate import quad
+from scipy.optimize import fsolve
+from typing import Callable
+
+def solve_for_A(k: float, w: float, delta_z: float, r0_pw_given: float) -> float:
+    """
+    Solve for the parameter A in the integral equation using the given V(h) function.
+
+    Parameters:
+    k (float): Constant k.
+    w (float): RMS wind speed.
+    delta_z_km (float): The range of z in kilometers.
+    r0_pw_given (float): The given value of r0,pw.
+    V_function (Callable[[float], float]): Function that calculates V(h) given h.
+
+    Returns:
+    float: The value of A that satisfies the equation.
+    """
+ 
+ 
+    
+
+    # Define Cn^2(h)
+    def Cn2(h: float, A: float) -> float:
+        term1 = 0.00594 * (w / 27)**2 * (10**-5 * h)**10 * np.exp(-h / 1000)
+        term2 = 2.7 * 10**-16 * np.exp(-h / 1500)
+        term3 = A * np.exp(-h / 100)
+        return term1 + term2 + term3
+
+    # Define the integral function
+    def integral_function(A: float) -> float:
+        integrand = lambda z: Cn2(z, A)
+        integral_value, _ = quad(integrand, 0, delta_z)
+        return integral_value
+
+    # Define the equation to solve for A
+    def equation_to_solve(A: float) -> float:
+        integral_value = integral_function(A)
+        r0_pw_calculated = (0.423 * k**2 * integral_value)**(-3/5)
+        return r0_pw_calculated - r0_pw_given
+
+    # Solve for A
+    A_initial_guess = 1.7e-14  # Initial guess for A
+    A_solution = fsolve(equation_to_solve, A_initial_guess)
+
+    return A_solution[0]
+
 
 
 def circ_orbit_geo(h_orbit, elev_angle_deg = 90):
@@ -56,9 +107,11 @@ def circ_orbit_geo(h_orbit, elev_angle_deg = 90):
 
 
 
-def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = False, lamda = 1550e-9, A = 1.7e-14):
+def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = False, r0 = None, num_layers = 20, lamda = 1550e-9, A = 1.7e-14, max_altitude = 20e3):
         
         k = 2 * np.pi / lamda
+        
+        
 
     
         
@@ -71,26 +124,30 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
         bufton_function_Cn2 = lambda h: ground_wind_speed + 30 * np.exp(-((h - 9400) / 4800) ** 2)
 
         #calculing rms wind
-        rms_wind = np.sqrt(1 / (15 * 1e3) * integrate.quad(bufton_function_Cn2, 5e3, 20e3)[0])
+        rms_wind = np.sqrt(1 / (15 * 1e3) * integrate.quad(bufton_function_Cn2, 5e3, max_altitude)[0])
+        
+        if r0 != None:
+            A = solve_for_A(k, rms_wind, max_altitude, r0)
 
         # cn2 calculation
         cn2 = lambda h : (.00594 * (rms_wind / 27) ** 2 * (1e-5*h) ** 10 * np.exp(-h/1000) + 2.7e-16 * np.exp(-h/1500) + A * np.exp(-h/100))
-
+        
 
         # r0 calculation
         r0_calc = lambda h1, h2 : ( .423 * k ** 2 * integrate.quad(cn2, h1, h2)[0] ) ** (-3/5)
-
+        
         
         #scintillation index calculation
         etha = 0
         scintillation_index = lambda h0, H : 2.25 * k ** (7/6) * (1/cos(etha)) ** (11/6) * integrate.quad(lambda h : cn2(h) * (h-h0) ** (5/6), h0, H)[0]
 
-        # 15-layer setup
-        setup_h = [1e2, 1e3, 2e3, 3e3, 4e3, 5e3, 6e3, 7e3, 8e3, 9e3, 10e3, 12e3, 14e3, 16e3, 18e3, 20e3]
+        
 
-        # sci_indx < 0.1 sci_indx(full_path)
+        # sci_indx < (num_layers / 100) * sci_indx(full_path)
+        
+        
 
-        threshold = 0.1 * integrate.quad(lambda h : cn2(h) * (h-0) ** (5/6), 0, 20000)[0]
+        threshold = (1 / num_layers) * integrate.quad(lambda h : cn2(h) * (h-0) ** (5/6), 0, max_altitude)[0]
 
         if print_results:
             print(f"Threshold: {threshold}")
@@ -110,7 +167,7 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
 
         H = result = 0
         h_arr = [H]
-        while(result <= 20000):
+        while(result <= max_altitude):
             h0 = result
             initial_guess = h0
             equation_to_solve = lambda H : integrate.quad(lambda h : cn2(h) * (h) ** (5/6), h0, H)[0] - threshold
@@ -381,6 +438,14 @@ def create_output_directory(base_dir='outputs'):
     os.makedirs(run_dir, exist_ok=True)
     
     return run_dir
+
+
+
+def load_config(file_path='config.json'):
+    import json
+    with open(file_path, 'r') as file:
+        config = json.load(file)
+    return config
 
 
 

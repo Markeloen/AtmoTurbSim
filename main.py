@@ -14,15 +14,15 @@ from core.phase_screens import PhaseScreenVonKarman
 from core.propagation import Propagator
 from simulator import *
 from validation_scripts import *
+from core.utils import load_config
 
 def run_simulation():
     # Example simulation function
     print("Running simulation...")
-    simulator = Simulator(128, 2e-2)
+    config = load_config('config.json')
+    simulator = Simulator(config)
     simulator.animate_turb()
-    plt.show()
     
-    simulator.animate_turb()
 
 
 def main():

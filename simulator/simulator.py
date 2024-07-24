@@ -33,8 +33,15 @@ class Simulator:
             whole_simulation_time=simulation_params["whole_simulation_time"],
             per_tick_simulation=simulation_params["per_tick_simulation"],
             satellite_orbit=simulation_params["satellite_orbit"],
-            ground_wind_speed=atmosphere_params["ground_wind_speed"]
+            ground_wind_speed=atmosphere_params["ground_wind_speed"],
+            L0=atmosphere_params["L0"]
         )
+        
+        # print geometry info
+        self.geometry.show_object_info()
+        
+        self.real_sim_flag = config["real_world_simulation_flag"]
+        
         # Create a timestamped output directory
         self.output_dir = create_output_directory()
         # The config file path is always at the root
@@ -82,7 +89,8 @@ class Simulator:
         
     def animate_turb(self, steps=10):
         
-        steps = int(self.whole_simulation_time / self.per_tick_simulation)
+        if self.real_sim_flag:
+            steps = int(self.whole_simulation_time / self.per_tick_simulation)
         
         x = np.arange(-self.nx_size/2., self.nx_size/2.) * self.delta
         [x1, y1] = np.meshgrid(x, x) 

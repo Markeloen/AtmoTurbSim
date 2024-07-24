@@ -1,11 +1,14 @@
 
 {
+    "real_world_simulation_flag" : false,
+
     "atmosphere_params": {
       "num_layers": 5,
       "total_r0": 20e-2,
       "phase_screen_size": 128,
       "delta": 2e-2,
-      "ground_wind_speed": 5
+      "ground_wind_speed": 5,
+      "L0": 50
     },
     
     "simulation_params": {

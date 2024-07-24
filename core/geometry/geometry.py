@@ -19,6 +19,7 @@ class Geometry:
     per_tick_simulation: float = 1e-3  # seconds
     satellite_orbit: float = 6e5
     ground_wind_speed: float = 5
+    L0: float = 50
     r0_array: list = field(default_factory=list, init=False)
     layer_height_array: list = field(default_factory=list, init=False)
     wind_profile_array: list = field(default_factory=list, init=False)
@@ -31,12 +32,12 @@ class Geometry:
         Initializes the Geometry object, calculating necessary profiles and creating Layer objects.
         """
         # Calculate r0, layer height, and wind profile
-        results = calc_r0_profile(self.ground_wind_speed, self.satellite_orbit, True, self.r0, self.number_of_layers)
+        results = calc_r0_profile(self.ground_wind_speed, self.satellite_orbit, False, self.r0, self.number_of_layers)
         self.r0_array, self.layer_height_array, self.wind_profile_array = results
 
         # Create Layer objects and number of extrusions array
         for i in range(self.number_of_layers):
-            self.layer_object_array.append(Layer(self.nx_size, self.pixel_scale, self.r0_array[i]))
+            self.layer_object_array.append(Layer(self.nx_size, self.pixel_scale, self.r0_array[i], self.L0))
             print(f"Currently creating a Layer at height: {self.layer_height_array[i]} ...")
             # Calculate phase screen evolution speed at each layer (m/s)
             self.number_extrusions_array_per_tick.append(
@@ -76,7 +77,6 @@ class Geometry:
         print(f"r0_array: {self.r0_array}")
         print(f"layer_height_array: {self.layer_height_array}")
         print(f"wind_profile_array: {self.wind_profile_array}")
-        print(f"layer_object_array: {self.layer_object_array}")
         print(f"number_extrusions_array_per_tick: {self.number_extrusions_array_per_tick}")
         print(f"number_extrusion_array_whole: {self.number_extrusion_array_whole}")
 

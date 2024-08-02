@@ -23,6 +23,7 @@ class Simulator:
         self.num_layers = atmosphere_params["num_layers"]
         self.whole_simulation_time = simulation_params["whole_simulation_time"]
         self.per_tick_simulation = simulation_params["per_tick_simulation"]
+        self.all_steps = int(self.whole_simulation_time / self.per_tick_simulation)
         
         
         self.geometry = Geometry(
@@ -42,8 +43,7 @@ class Simulator:
         
         self.real_sim_flag = config["real_world_simulation_flag"]
         
-        # Create a timestamped output directory
-        self.output_dir = create_output_directory()
+        
         # The config file path is always at the root
         self.config_file_path = 'config.json'
         # Creating a propagator class for 20km and 1550nm wvl
@@ -87,10 +87,14 @@ class Simulator:
             
         plt.close()
         
+
     def animate_turb(self, steps=10):
+
+        # Create a timestamped output directory
+        self.output_dir = create_output_directory()
         
         if self.real_sim_flag:
-            steps = int(self.whole_simulation_time / self.per_tick_simulation)
+            steps = self.all_steps
         
         x = np.arange(-self.nx_size/2., self.nx_size/2.) * self.delta
         [x1, y1] = np.meshgrid(x, x) 
@@ -146,3 +150,19 @@ class Simulator:
         print("Saving config file...")
         self.save_config()
         print("Config file saved as 'config.json'")
+
+
+    def simulate_one_step(self):
+        
+
+        x = np.arange(-self.nx_size/2., self.nx_size/2.) * self.delta
+        [x1, y1] = np.meshgrid(x, x) 
+        Uin = rect(x1, self.nx_size * self.delta) * rect(y1, self.nx_size * self.delta)
+        
+        ps_arr = [layer.scrn for layer in self.geometry.layer_object_array]
+
+        Uout, _, _ = self.propagator.propagate(Uin, ps_arr)
+        
+        ps_arr = self.geometry.move_one_tick_all_layers()
+
+        return Uout.numpy()

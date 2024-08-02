@@ -206,7 +206,7 @@ def calc_r0_profile(ground_wind_speed, stellite_orbit_height, print_results = Fa
         h_arr  = [item.item() if isinstance(item, np.ndarray) else item for item in h_arr]
         wind_profile = [item.item() if isinstance(item, np.ndarray) else item for item in wind_profile]
         # wind_profile = [item[0] for item in wind_profile]
-        return r0_array, h_arr, wind_profile
+        return r0_array, h_arr, wind_profile, cn2
         
 def calculate_number_of_extrusions(layer: Layer, v_total, simulation_tick_time_sec):
     """Bufton model V(h) gives out the evolution speed of a phase screen at height h = v_total"""

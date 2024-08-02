@@ -33,7 +33,7 @@ class Geometry:
         """
         # Calculate r0, layer height, and wind profile
         results = calc_r0_profile(self.ground_wind_speed, self.satellite_orbit, False, self.r0, self.number_of_layers)
-        self.r0_array, self.layer_height_array, self.wind_profile_array = results
+        self.r0_array, self.layer_height_array, self.wind_profile_array, self.cn2 = results
 
         # Create Layer objects and number of extrusions array
         for i in range(self.number_of_layers):

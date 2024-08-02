@@ -16,12 +16,17 @@ from simulator import *
 from validation_scripts import *
 from core.utils import load_config
 
+from tests import *
+
 def run_simulation():
     # Example simulation function
     print("Running simulation...")
     config = load_config('config.json')
     simulator = Simulator(config)
     simulator.animate_turb()
+
+def run_test():
+    simulator_scintillation_index_over_time()
     
 
 
@@ -30,7 +35,10 @@ def main():
     print("Running main script...")
     
     # Example: Running simulation
-    run_simulation()
+    # run_simulation()
+
+    # Running Test
+    run_test()
 
 if __name__ == "__main__":
     main()

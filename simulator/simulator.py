@@ -37,6 +37,10 @@ class Simulator:
             ground_wind_speed=atmosphere_params["ground_wind_speed"],
             L0=atmosphere_params["L0"]
         )
+
+        
+        # Create a timestamped output directory
+        self.output_dir = create_output_directory()
         
         # print geometry info
         self.geometry.show_object_info()
@@ -90,8 +94,6 @@ class Simulator:
 
     def animate_turb(self, steps=10):
 
-        # Create a timestamped output directory
-        self.output_dir = create_output_directory()
         
         if self.real_sim_flag:
             steps = self.all_steps
@@ -164,5 +166,4 @@ class Simulator:
         Uout, _, _ = self.propagator.propagate(Uin, ps_arr)
         
         ps_arr = self.geometry.move_one_tick_all_layers()
-
         return Uout.numpy()

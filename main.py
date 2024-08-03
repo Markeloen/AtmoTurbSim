@@ -26,7 +26,7 @@ def run_simulation():
     simulator.animate_turb()
 
 def run_test():
-    simulator_scintillation_index_over_time()
+    simulator_scintillation_index_over_time_animate()
     
 
 

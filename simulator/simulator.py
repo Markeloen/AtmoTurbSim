@@ -92,7 +92,7 @@ class Simulator:
         plt.close()
         
 
-    def animate_turb(self, steps=10):
+    def animate_turb(self, steps=100):
 
         
         if self.real_sim_flag:

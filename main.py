@@ -26,7 +26,8 @@ def run_simulation():
     simulator.animate_turb()
 
 def run_test():
-    simulator_scintillation_index_over_time_animate()
+    simulator_scintillation_index_over_time()
+    # simulator_scintillation_index_over_time_animate()
     
 
 
@@ -35,7 +36,7 @@ def main():
     print("Running main script...")
     
     # Example: Running simulation
-    # run_simulation()
+    run_simulation()
 
     # Running Test
     run_test()

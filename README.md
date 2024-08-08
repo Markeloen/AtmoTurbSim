@@ -1,5 +1,5 @@
 # Installation Instructions
-Install [Python 3.12.4](https://www.python.org/downloads/release/python-3124/).
+
 
 Install [Miniconda](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe).
 
@@ -24,21 +24,26 @@ Install [Git](https://git-scm.com/download/win)
 ```
 4. Set up and activate virtual environment using Conda
 ```
- conda create --name simulator python=3.12.4
+ conda create --name simulator python=3.9
  conda activate simulator
 ```
 5. Install TensorFlow for GPU run
 ```
-conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
-pip install tensorflow==2.10
+ pip install --upgrade pip
+ conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
+ pip install "tensorflow<2.11" 
 
 ```
-
-pip install virtualenv
-python -m venv venv
-source venv/bin/activate
-# Install requirements
-pip install -r requirements.txt
-# Run the main script
+6. Verify TensorFlow
+```
+ python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
+7. Install required packages
+```
+ pip install -r requirements.txt
+```
+8. Run the simulator
+```
 python main.py
 ```
+Outputs are stored in the `/outputs` directory.

@@ -114,9 +114,14 @@ class Simulator:
 
         # Generate frames in advance with a progress bar
         frames = []
+        # Initialize an empty list to store Uout at each iteration
+        Uout_array = []
         for i in tqdm(range(steps), desc="Generating frames"):
             Uout, _, _ = self.propagator.propagate(Uin, ps_arr)
             frames.append((np.angle(Uout), np.abs(Uout)))
+
+            # Append Uout to the list
+            Uout_array.append(Uout)
             ps_arr = self.geometry.move_one_tick_all_layers()
 
         # Animation update function
@@ -147,6 +152,11 @@ class Simulator:
         
         
         plt.close(fig)
+
+        # Save Uout_array
+        print("Saving Uout_array...")
+        np.save(os.path.join(self.output_dir, 'Uout_array.npy'), Uout_array)
+        print("Uout_array saved as 'Uout_array.npy'")
 
         print("Animation saved as 'turbulence_animation.gif'")
         print("Saving config file...")
